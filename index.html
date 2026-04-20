@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareSense Global | International Oncology Intelligence</title>
+
+    <!-- Premium Global Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+</head>
+
+<body>
+
+
+
+    <div id="app" class="platform">
+
+        <!-- Cinematic Hero Section -->
+        <header class="hero-section">
+            <div class="hero-bg" style="background-image: url('assets/hero.png');"></div>
+            <div class="hero-overlay"></div>
+            <div class="hero-content container">
+                <span class="eyebrow">WORLD-CLASS ONCOLOGY INTELLIGENCE</span>
+                <h1>Empowering the Global Nursing Community</h1>
+                <p>Advanced AI-driven breast cancer screening built for hospitals and clinical centers worldwide.</p>
+                <a href="#diagnostic" class="btn-cta">Start Assessment</a>
+            </div>
+        </header>
+
+        <!-- The Diagnostic Lab -->
+        <section id="diagnostic" class="diagnostic-lab-section">
+            <div class="section-bg-image" style="background-image: url('assets/awareness_bg.png');"></div>
+            <div class="container">
+                <div class="assessment-suite">
+                    <div class="suite-header">
+                        <h2>Diagnostic Console</h2>
+                        <p>Analyze clinical observations with international standard diagnostic metrics.</p>
+                    </div>
+
+                    <div class="diagnostic-grid">
+                        <!-- Input Console -->
+                        <div class="console-card">
+                            <div class="input-group">
+                                <label>Clinical Findings Input</label>
+                                <textarea id="symptoms"
+                                    placeholder="Example: 52yo Female, firm irregular mass 2cm, fixed to chest wall..."></textarea>
+                            </div>
+                            <button id="analyze-btn" class="btn-execute">
+                                <span id="btn-text">INITIALIZE ANALYTICS</span>
+                                <div id="loader" class="spinner hidden"></div>
+                            </button>
+                        </div>
+
+                        <!-- Visualization Dashboard -->
+                        <div id="result-panel" class="dashboard-card hidden">
+                            <div class="viz-header">
+                                <h3>DIAGNOSTIC VISUALIZATION</h3>
+                                <div id="risk-display" class="risk-indicator">--</div>
+                            </div>
+
+                            <div class="charts-row">
+                                <div class="chart-box">
+                                    <div class="chart-canvas-wrap">
+                                        <canvas id="confidenceChart"></canvas>
+                                        <div class="chart-label"><span id="conf-val">0%</span><small>PROBABILITY</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="chart-box">
+                                    <canvas id="radarChart"></canvas>
+                                </div>
+                            </div>
+
+                            <div class="clinical-findings">
+                                <h4>CLINICAL FINDINGS & REASONING</h4>
+                                <p id="reasoning-box"></p>
+                            </div>
+
+                            <div class="report-actions">
+                                <button class="btn-report" onclick="window.print()">Generate PDF Report</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Global Impact Section -->
+        <section id="impact" class="impact-section">
+            <div class="container grid-2">
+                <div class="text-block">
+                    <span class="label">INTERNATIONAL STATISTICS</span>
+                    <h2>The Impact of Early Detection</h2>
+                    <p>Breast cancer is the most common cancer globally. Early AI-assisted detection can increase
+                        survival rates by up to 90%. Our mission is to provide these tools to every nursing station on
+                        the planet.</p>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <h3>2.3M</h3>
+                            <p>Global Cases/Year</p>
+                        </div>
+                        <div class="stat-item">
+                            <h3>~90%</h3>
+                            <p>Early Survival Rate</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="image-block">
+                    <img src="assets/bg.png" alt="Abstract Science" class="parallax-img">
+                </div>
+            </div>
+        </section>
+
+        <!-- Global Footer -->
+        <footer class="global-footer">
+            <div class="container flex-row">
+                <div class="footer-brand">
+                    <div class="logo">⚕️ CareSense<span>Global</span></div>
+                    <p>International standard oncology nursing intelligence system.</p>
+                    <div class="developer-profile">
+                        <span class="dev-label">PROJECT LEAD</span>
+                        <p class="dev-name">Muhammad Uwaim Qureshi</p>
+                        <p class="dev-title">Software Engineer & Flutter Developer</p>
+                        <a href="mailto:uwaim2561@gmail.com" class="dev-email">uwaim2561@gmail.com</a>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <h5>Resources</h5>
+                    <ul>
+                        <li><a href="#">WHO Database</a></li>
+                        <li><a href="#">Oncology Journals</a></li>
+                        <li><a href="#">Nursing Standards</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2024 CareSense Global Intelligence Lab. Designed for International Clinical Excellence.</p>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- Core Platform Logic -->
+    <script src="main.js"></script>
+</body>
+
+</html>
