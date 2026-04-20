@@ -14,7 +14,9 @@
         rel="stylesheet">
 
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Three.js for Premium 3D Visuals -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 </head>
 
@@ -67,18 +69,14 @@
                                 <div id="risk-display" class="risk-indicator">--</div>
                             </div>
 
-                            <div class="charts-row">
-                                <div class="chart-box">
-                                    <div class="chart-canvas-wrap">
-                                        <canvas id="confidenceChart"></canvas>
-                                        <div class="chart-label"><span id="conf-val">0%</span><small>PROBABILITY</small>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="chart-box">
-                                    <canvas id="radarChart"></canvas>
+                            <div id="diagnostic-3d-container" class="diagnostic-viz-3d">
+                                <!-- Three.js will inject the 3D scene here -->
+                                <div id="probability-orb-wrap" class="orb-container">
+                                    <div id="conf-val" class="probability-text">0%</div>
+                                    <small class="probability-sub">PROBABILITY</small>
                                 </div>
                             </div>
+
 
                             <div class="clinical-findings">
                                 <h4>CLINICAL FINDINGS & REASONING</h4>
