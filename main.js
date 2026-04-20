@@ -6,8 +6,8 @@
 const ENCRYPTED_KEY_DATA = "88f81c0be7e9b1f9173362be10d33173:8b316149c80cc86702f95a2cb33dfd935b6f251eddec776a9262b6f1463c2d3e2e7049498cb718d389734e769024099da2c359827a92ff8590b1dec090156dff";
 const SALT = "breast-cancer-assessment-nursing-secure-salt";
 
-let confidenceChartInstance = null;
-let radarChartInstance = null;
+let diagnostic3DEngine = null;
+
 
 function getDecryptedKey() {
     try {
@@ -129,56 +129,160 @@ function renderPlatformResults(data) {
     console.log("CareSense Global AI Data:", data);
     animateCounter(probability, confValLabel);
 
-    // Initializations Charts
+    // Initializations 3D Visuals
     const isHigh = probability > 0.7;
-    initPlatformCharts(probability, factor_scores, statusColor, isHigh);
+    init3DPlatform(probability, factor_scores, statusColor, isHigh);
 
     // Reasoning Feed
     typewriterEffect(reasoning, reasoningBox);
 }
 
-function initPlatformCharts(probability, scores, mainColor, isHigh) {
-    // Probability Donut
-    if (confidenceChartInstance) confidenceChartInstance.destroy();
-    const confCtx = document.getElementById('confidenceChart').getContext('2d');
-    confidenceChartInstance = new Chart(confCtx, {
-        type: 'doughnut',
-        data: {
-            datasets: [{
-                data: [probability * 100, (1 - probability) * 100],
-                backgroundColor: [mainColor, '#f1f5f9'],
-                borderWidth: 0,
-            }]
-        },
-        options: { cutout: '82%', responsive: true, maintainAspectRatio: false, plugins: { tooltip: { enabled: false }, legend: { display: false } }, animation: { duration: 2500, easing: 'easeOutQuart' } }
-    });
+/**
+ * Three.js 3D Diagnostic Engine
+ */
+class ThreeDiagnosticEngine {
+    constructor(containerId) {
+        this.container = document.getElementById(containerId);
+        this.scene = new THREE.Scene();
+        this.camera = new THREE.PerspectiveCamera(45, this.container.offsetWidth / this.container.offsetHeight, 0.1, 1000);
+        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 
-    // Radar Profile
-    if (radarChartInstance) radarChartInstance.destroy();
-    const radarCtx = document.getElementById('radarChart').getContext('2d');
-    radarChartInstance = new Chart(radarCtx, {
-        type: 'radar',
-        data: {
-            labels: ['Density', 'History', 'Skin', 'Discharge', 'Pain'],
-            datasets: [{
-                label: 'Symptomatic Intensity',
-                data: [scores.density, scores.history, scores.skin, scores.discharge, scores.pain],
-                backgroundColor: isHigh ? 'rgba(219, 39, 119, 0.2)' : 'rgba(16, 185, 129, 0.2)',
-                borderColor: mainColor,
-                pointBackgroundColor: '#0f172a',
-                borderWidth: 2,
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: { r: { beginAtZero: true, max: 10, grid: { color: 'rgba(0,0,0,0.05)' }, angleLines: { color: 'rgba(0,0,0,0.05)' }, ticks: { display: false } } },
-            plugins: { legend: { display: false } },
-            animation: { duration: 2000, easing: 'easeOutQuart' }
+        this.renderer.setSize(this.container.offsetWidth, this.container.offsetHeight);
+        this.renderer.setPixelRatio(window.devicePixelRatio);
+        this.container.appendChild(this.renderer.domElement);
+
+        this.camera.position.z = 20;
+
+        // Lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        this.scene.add(ambientLight);
+        this.pointLight = new THREE.PointLight(0xffffff, 1);
+        this.pointLight.position.set(5, 5, 5);
+        this.scene.add(this.pointLight);
+
+        // State
+        this.crystal = null;
+        this.orb = null;
+        this.scanRing = null;
+        this.targetColor = new THREE.Color("#10b981");
+        this.pulseFactor = 1.0;
+
+        this.initGeometries();
+        this.animate();
+
+        window.addEventListener('resize', () => this.handleResize());
+    }
+
+    initGeometries() {
+        // 0. Reference Grid
+        const grid = new THREE.PolarGridHelper(10, 16, 8, 64, 0x000000, 0x000000);
+        grid.position.y = -8;
+        grid.material.opacity = 0.05;
+        grid.material.transparent = true;
+        this.scene.add(grid);
+
+        // 1. Crystal (Hexagonal/Polyhedron representation of metrics)
+        const geometry = new THREE.IcosahedronGeometry(6, 1);
+        const material = new THREE.MeshPhongMaterial({
+            color: 0xec4899,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.2,
+            side: THREE.DoubleSide
+        });
+        this.crystal = new THREE.Mesh(geometry, material);
+        this.scene.add(this.crystal);
+
+        // 2. Risk Orb (The Core)
+        const orbGeo = new THREE.SphereGeometry(2, 32, 32);
+        const orbMat = new THREE.MeshPhongMaterial({
+            color: 0x10b981,
+            emissive: 0x10b981,
+            emissiveIntensity: 0.5,
+            shininess: 100
+        });
+        this.orb = new THREE.Mesh(orbGeo, orbMat);
+        this.scene.add(this.orb);
+
+        // 3. Scanning Ring
+        const ringGeo = new THREE.TorusGeometry(8, 0.05, 16, 100);
+        const ringMat = new THREE.MeshBasicMaterial({ color: 0xec4899, transparent: true, opacity: 0.5 });
+        this.scanRing = new THREE.Mesh(ringGeo, ringMat);
+        this.scanRing.rotation.x = Math.PI / 2;
+        this.scene.add(this.scanRing);
+    }
+
+
+    updateData(probability, scores, color, isHigh) {
+        this.targetColor = new THREE.Color(color);
+        this.isHigh = isHigh;
+        this.probability = probability;
+
+        // Update Crystal Vertices based on scores
+        // Each score is 0-10. We map it to vertex distance.
+        const positionAttribute = this.crystal.geometry.attributes.position;
+        const vertexCount = positionAttribute.count;
+        const scoreValues = [scores.density, scores.history, scores.skin, scores.discharge, scores.pain];
+
+        for (let i = 0; i < vertexCount; i++) {
+            const scoreIndex = i % scoreValues.length;
+            const factor = (scoreValues[scoreIndex] / 10) * 2 + 5; // Scale to 5-7 range
+
+            const x = positionAttribute.getX(i);
+            const y = positionAttribute.getY(i);
+            const z = positionAttribute.getZ(i);
+
+            const vector = new THREE.Vector3(x, y, z).normalize().multiplyScalar(factor);
+            positionAttribute.setXYZ(i, vector.x, vector.y, vector.z);
         }
-    });
+        this.crystal.geometry.attributes.position.needsUpdate = true;
+
+        // Update Colors
+        this.orb.material.color = this.targetColor;
+        this.orb.material.emissive = this.targetColor;
+        this.crystal.material.color = this.targetColor;
+    }
+
+    animate() {
+        requestAnimationFrame(() => this.animate());
+
+        if (this.crystal) {
+            this.crystal.rotation.y += 0.005;
+            this.crystal.rotation.z += 0.002;
+        }
+
+        if (this.orb) {
+            // Pulsing effect based on probability
+            const speed = 0.02 + (this.probability || 0) * 0.05;
+            this.pulseFactor += speed;
+            const scale = 1 + Math.sin(this.pulseFactor) * 0.1;
+            this.orb.scale.set(scale, scale, scale);
+            this.orb.material.emissiveIntensity = 0.5 + Math.sin(this.pulseFactor) * 0.3;
+        }
+
+        if (this.scanRing) {
+            this.scanRing.position.y = Math.sin(Date.now() * 0.002) * 8;
+            this.scanRing.material.opacity = 0.3 + Math.sin(Date.now() * 0.002) * 0.2;
+        }
+
+        this.renderer.render(this.scene, this.camera);
+    }
+
+
+    handleResize() {
+        this.camera.aspect = this.container.offsetWidth / this.container.offsetHeight;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(this.container.offsetWidth, this.container.offsetHeight);
+    }
 }
+
+function init3DPlatform(probability, scores, color, isHigh) {
+    if (!diagnostic3DEngine) {
+        diagnostic3DEngine = new ThreeDiagnosticEngine('diagnostic-3d-container');
+    }
+    diagnostic3DEngine.updateData(probability, scores, color, isHigh);
+}
+
 
 function animateCounter(target, element) {
     const final = target * 100;
